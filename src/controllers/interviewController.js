@@ -20,12 +20,26 @@ export const createInterview = async (req, res) => {
 // Get all interviews
 export const getAllInterviews = async (req, res) => {
     try {
-        const interviews = await Interview.find({ user: req.user.id }); // Fetch only user-specific interviews
+        const { candidateName, status } = req.query;
+        const filter = { user: req.user.id }; // Only fetch interviews for logged-in user
+
+        if (candidateName) {
+            filter.candidateName = { $regex: candidateName, $options: "i" }; // Case-insensitive search
+        }
+
+        if (status) {
+            filter.status = status;
+        }
+
+        const interviews = await Interview.find(filter);
         res.status(200).json(interviews);
     } catch (error) {
+        console.error("❌ Error fetching interviews:", error);
         res.status(500).json({ error: "Error fetching interviews" });
     }
 };
+
+
 
 
 
